@@ -65,10 +65,15 @@ header {
     color: #880e4f;
 }
 
+.alert{
+    background-color: #f25d947b;
+}
+
 /* เพิ่มไอคอนหัวใจในผลลัพธ์ */
-.alert {
+.alert-danger {
     background-color: #fce4ec;
-    border: 2px solid #f06292;
+    border: rgba(0, 0, 0, 0.5) 2px solid;
+   /*  border: 2px solid #f06292; */
     color: #ad1457;
     font-weight: bold;
     padding: 15px;
