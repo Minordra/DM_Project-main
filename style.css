@@ -1,0 +1,86 @@
+/* ธีมวาเลนไทน์ */
+body {
+    background-color: #ffebee;
+    font-family: 'Arial', sans-serif;
+    color: #880e4f;
+    text-align: center;
+}
+
+/* ปรับสไตล์ของเฮดเดอร์ */
+header {
+    background-color: #e91e63;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* ปรับแต่งการ์ดให้ดูน่ารัก */
+.card {
+    border: 2px solid #f06292;
+    background-color: #f8bbd0;
+    border-radius: 15px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ปรับแต่งปุ่มให้ดูโรแมนติกขึ้น */
+.btn-danger {
+    background-color: #d81b60;
+    border: none;
+    font-size: 18px;
+    padding: 12px;
+    border-radius: 25px;
+}
+
+.btn-danger:hover {
+    background-color: #c2185b;
+}
+
+/* ปรับแต่งปุ่มล้างข้อมูล */
+#clearBtn {
+    background-color: #ff6b81;
+    border: none;
+    color: white;
+    font-size: 16px;
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 25px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#clearBtn:hover {
+    background-color: #ff4757;
+}
+
+/* ปรับแต่งตารางแสดงผลให้ดูอบอุ่นขึ้น */
+.table {
+    background-color: #ffcdd2;
+    border: 2px solid #f06292;
+    border-radius: 10px;
+}
+
+.table td, .table th {
+    border: 1px solid #f48fb1;
+    padding: 10px;
+    color: #880e4f;
+}
+
+/* เพิ่มไอคอนหัวใจในผลลัพธ์ */
+.alert {
+    background-color: #fce4ec;
+    border: 2px solid #f06292;
+    color: #ad1457;
+    font-weight: bold;
+    padding: 15px;
+}
+
+/* เพิ่มเอฟเฟกต์โรแมนติกให้กับหน้าเว็บ */
+@keyframes floatingHearts {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+h1, h2 {
+    animation: floatingHearts 3s infinite;
+}
