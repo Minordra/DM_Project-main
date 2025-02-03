@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ระบบพยากรณ์ความเข้ากันได้ของคู่รัก</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f1f3f5;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .container {
+      max-width: 900px;
+    }
+    h1, h3 {
+      color: #343a40;
+    }
+    .section {
+      margin-bottom: 30px;
+    }
+    .weight-table th, .weight-table td {
+      vertical-align: middle;
+    }
+    .card-header {
+      background-color: #ff6b6b;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <!-- Header -->
+    <h1 class="text-center mb-4">ระบบพยากรณ์ความเข้ากันได้ของคู่รัก</h1>
+    <p class="text-center text-muted mb-5">อัปโหลดไฟล์ CSV เพื่อฝึกโมเดล หรือกรอกข้อมูลเพื่อพยากรณ์</p>
+    
+    <!-- Section 1: Upload Dataset -->
+    <div class="section card shadow-sm mb-4">
+      <div class="card-header">อัปโหลด Dataset (CSV)</div>
+      <div class="card-body">
+        <div class="mb-3">
+          <input type="file" id="datasetFile" accept=".csv" class="form-control">
+          <div class="form-text">
+            CSV ควรมี header: 
+            <code>user_gender, user_age, user_race, partner_age, partner_race, partner_attr_rating, partner_sinc_rating, partner_intel_rating, partner_fun_rating, partner_amb_rating, partner_shared_rating, match_result</code>
+          </div>
+        </div>
+        <button id="uploadBtn" class="btn btn-success">อัปโหลด</button>
+        <div id="uploadMessage" class="mt-3"></div>
+        <div id="datasetPreview" class="mt-3"></div>
+      </div>
+    </div>
+    
+    <!-- Section 2: Train Model -->
+    <div class="section card shadow-sm mb-4">
+      <div class="card-header">ฝึกโมเดล (Train Model)</div>
+      <div class="card-body">
+        <div class="row mb-3">
+          <div class="col-md-6">
+            <label for="epochs" class="form-label">จำนวน Epochs</label>
+            <input type="number" id="epochs" class="form-control" value="1000">
+          </div>
+          <div class="col-md-6">
+            <label for="learningRate" class="form-label">Learning Rate</label>
+            <input type="number" step="0.00001" id="learningRate" class="form-control" value="0.00001">
+          </div>
+        </div>
+        <div class="mb-3">
+          <label for="trainActivation" class="form-label">เลือก Activation Function (สำหรับฝึก)</label>
+          <select id="trainActivation" class="form-select">
+            <option value="sigmoid">Sigmoid</option>
+            <option value="relu">ReLU</option>
+            <option value="linear">Linear</option>
+            <option value="tanh">Tanh</option>
+          </select>
+        </div>
+        <button id="trainBtn" class="btn btn-warning">ฝึกโมเดล</button>
+        <div id="trainLog" class="mt-3" style="max-height: 200px; overflow-y: auto;"></div>
+        <!-- Display Weights & Bias -->
+        <h5 class="mt-4">ค่าน้ำหนัก (Weights) & Bias</h5>
+        <table class="table table-bordered weight-table">
+          <thead>
+            <tr>
+              <th>Input Feature</th>
+              <th>Weight</th>
+            </tr>
+          </thead>
+          <tbody id="weightsTableBody"></tbody>
+          <tfoot>
+            <tr>
+              <th>Bias</th>
+              <th id="biasValue"></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Section 3: Predict -->
+    <div class="section card shadow-sm mb-4">
+      <div class="card-header">พยากรณ์ความเข้ากันได้ของคู่รัก (Predict)</div>
+      <div class="card-body">
+        <form id="predictForm">
+          <!-- ข้อมูลผู้ใช้ -->
+          <div class="row g-3">
+            <div class="col-md-4">
+              <label for="user_gender" class="form-label">เพศของผู้ใช้</label>
+              <select id="user_gender" name="user_gender" class="form-select" required>
+                <option value="0">หญิง</option>
+                <option value="1">ชาย</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label for="user_age" class="form-label">อายุของผู้ใช้</label>
+              <input type="number" id="user_age" name="user_age" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label for="user_race" class="form-label">เชื้อชาติของผู้ใช้</label>
+              <select id="user_race" name="user_race" class="form-select" required>
+                <option value="1">Black/African American</option>
+                <option value="2">European/Caucasian-American</option>
+                <option value="3">Latino/Hispanic American</option>
+                <option value="4">Asian/Pacific Islander/Asian-American</option>
+                <option value="5">Native American</option>
+                <option value="6">Other</option>
+              </select>
+            </div>
+          </div>
+          <!-- ข้อมูลคู่รัก -->
+          <div class="row g-3 mt-3">
+            <div class="col-md-4">
+              <label for="partner_age" class="form-label">อายุของคู่เดต</label>
+              <input type="number" id="partner_age" name="partner_age" class="form-control" required>
+            </div>
+            <div class="col-md-4">
+              <label for="partner_race" class="form-label">เชื้อชาติของคู่เดต</label>
+              <select id="partner_race" name="partner_race" class="form-select" required>
+                <option value="1">Black/African American</option>
+                <option value="2">European/Caucasian-American</option>
+                <option value="3">Latino/Hispanic American</option>
+                <option value="4">Asian/Pacific Islander/Asian-American</option>
+                <option value="5">Native American</option>
+                <option value="6">Other</option>
+              </select>
+            </div>
+          </div>
+          <!-- Rating Factors -->
+          <div class="row g-3 mt-3">
+            <div class="col-md-4">
+              <label for="partner_attr_rating" class="form-label">คะแนนเสน่ห์</label>
+              <input type="number" step="0.1" id="partner_attr_rating" name="partner_attr_rating" class="form-control" min="0" max="10" required>
+            </div>
+            <div class="col-md-4">
+              <label for="partner_sinc_rating" class="form-label">คะแนนความจริงใจ</label>
+              <input type="number" step="0.1" id="partner_sinc_rating" name="partner_sinc_rating" class="form-control" min="0" max="10" required>
+            </div>
+            <div class="col-md-4">
+              <label for="partner_intel_rating" class="form-label">คะแนนสติปัญญา</label>
+              <input type="number" step="0.1" id="partner_intel_rating" name="partner_intel_rating" class="form-control" min="0" max="10" required>
+            </div>
+            <div class="col-md-4">
+              <label for="partner_fun_rating" class="form-label">คะแนนความสนุก</label>
+              <input type="number" step="0.1" id="partner_fun_rating" name="partner_fun_rating" class="form-control" min="0" max="10" required>
+            </div>
+            <div class="col-md-4">
+              <label for="partner_amb_rating" class="form-label">คะแนนความทะเยอทะยาน</label>
+              <input type="number" step="0.1" id="partner_amb_rating" name="partner_amb_rating" class="form-control" min="0" max="10" required>
+            </div>
+            <div class="col-md-4">
+              <label for="partner_shared_rating" class="form-label">คะแนนการแบ่งปัน</label>
+              <input type="number" step="0.1" id="partner_shared_rating" name="partner_shared_rating" class="form-control" min="0" max="10" required>
+            </div>
+          </div>
+          
+          <!-- เลือก Activation Function สำหรับ Predict -->
+          <div class="mt-3">
+            <label for="activation" class="form-label">เลือก Activation Function (Predict)</label>
+            <select id="activation" name="activation" class="form-select" required>
+              <option value="sigmoid">Sigmoid</option>
+              <option value="relu">ReLU</option>
+              <option value="threshold">Threshold</option>
+              <option value="linear">Linear</option>
+              <option value="tanh">Tanh</option>
+            </select>
+          </div>
+          
+          <!-- Optional: Expected Output -->
+          <div class="mt-3">
+            <label for="expected" class="form-label">ค่า Expected Output (ถ้ามี)</label>
+            <input type="number" step="0.01" id="expected" name="expected" class="form-control" placeholder="ระบุค่าที่คาดหวัง (ไม่จำเป็น)">
+          </div>
+          
+          <div class="text-center mt-4">
+            <button type="submit" class="btn btn-primary">พยากรณ์</button>
+          </div>
+        </form>
+        
+        <!-- Display Predict Result -->
+        <div class="mt-4">
+          <h5>ผลการพยากรณ์:</h5>
+          <div id="predictResult" class="alert alert-info"></div>
+        </div>
+        
+        <!-- Display Activation Functions Table -->
+        <div id="activationTableContainer" class="mt-4"></div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- PapaParse สำหรับ parse CSV -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  
+  <!-- JavaScript Code -->
+  <script>
+    // Global variables
+    let dataset = [];
+    let trainedModel = null;  // { weights: [w0, w1, ...], bias: number }
+    let isTrained = false;
+    
+    // Activation functions
+    function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
+    function relu(x) { return Math.max(0, x); }
+    function threshold(x, thresh = 0) { return x > thresh ? 1 : 0; }
+    function linear(x) { return x; }
+    function tanh(x) { return Math.tanh(x); }
+    
+    // Apply activation based on name
+    function applyActivation(name, x) {
+      switch(name) {
+        case 'sigmoid': return sigmoid(x);
+        case 'relu': return relu(x);
+        case 'threshold': return threshold(x);
+        case 'linear': return linear(x);
+        case 'tanh': return tanh(x);
+        default: return x;
+      }
+    }
+    
+    // SECTION 1: Upload Dataset using PapaParse
+    document.getElementById('uploadBtn').addEventListener('click', function() {
+      const fileInput = document.getElementById('datasetFile');
+      if (fileInput.files.length === 0) {
+        document.getElementById('uploadMessage').innerText = "กรุณาเลือกไฟล์ CSV ก่อน";
+        return;
+      }
+      Papa.parse(fileInput.files[0], {
+        header: true,
+        skipEmptyLines: true,
+        complete: function(results) {
+          dataset = results.data;
+          document.getElementById('uploadMessage').innerText = "อัปโหลด Dataset สำเร็จแล้ว";
+          // แสดงตัวอย่างข้อมูล 5 แถวแรก
+          let previewHtml = '<h6>ตัวอย่างข้อมูล:</h6><table class="table table-bordered table-sm"><thead><tr>';
+          results.meta.fields.forEach(field => {
+            previewHtml += `<th>${field}</th>`;
+          });
+          previewHtml += '</tr></thead><tbody>';
+          for (let i = 0; i < Math.min(5, dataset.length); i++) {
+            previewHtml += '<tr>';
+            results.meta.fields.forEach(field => {
+              previewHtml += `<td>${dataset[i][field]}</td>`;
+            });
+            previewHtml += '</tr>';
+          }
+          previewHtml += '</tbody></table>';
+          document.getElementById('datasetPreview').innerHTML = previewHtml;
+          console.log("Dataset uploaded:", dataset);
+        }
+      });
+    });
+    
+    // SECTION 2: Train Model using Gradient Descent
+    document.getElementById('trainBtn').addEventListener('click', function() {
+      if (dataset.length === 0) {
+        alert("กรุณาอัปโหลด Dataset ก่อนฝึกโมเดล");
+        return;
+      }
+      const epochs = parseInt(document.getElementById('epochs').value);
+      const lr = parseFloat(document.getElementById('learningRate').value);
+      const activationTrain = document.getElementById('trainActivation').value; // ใช้ sigmoid ในการฝึกโดยทั่วไป
+      const numFeatures = 11;  // จำนวนฟีเจอร์ที่คาดว่าจะมีใน dataset
+      
+      // สุ่มค่า weights เริ่มต้นเล็กน้อย และ bias = 0
+      let weights = [];
+      for (let i = 0; i < numFeatures; i++) {
+        weights.push(Math.random() * 0.01);
+      }
+      let bias = 0;
+      let trainLogHtml = "";
+      
+      // ฝึกโมเดลด้วย Gradient Descent
+      for (let epoch = 1; epoch <= epochs; epoch++) {
+        let totalLoss = 0;
+        // สุ่มเรียง dataset
+        dataset.sort(() => Math.random() - 0.5);
+        dataset.forEach(row => {
+          // ตรวจสอบว่ามีข้อมูล match_result หรือไม่
+          if (!row['match_result']) return;
+          let inputs = [];
+          inputs.push(parseFloat(row['user_gender']));
+          inputs.push(parseFloat(row['user_age']));
+          inputs.push(parseFloat(row['user_race']));       // ในที่นี้ใช้ค่าจาก CSV โดยตรง
+          inputs.push(parseFloat(row['partner_age']));
+          inputs.push(parseFloat(row['partner_race']));
+          inputs.push(parseFloat(row['partner_attr_rating']));
+          inputs.push(parseFloat(row['partner_sinc_rating']));
+          inputs.push(parseFloat(row['partner_intel_rating']));
+          inputs.push(parseFloat(row['partner_fun_rating']));
+          inputs.push(parseFloat(row['partner_amb_rating']));
+          inputs.push(parseFloat(row['partner_shared_rating']));
+          const target = parseFloat(row['match_result']);
+          
+          // คำนวณค่า net
+          let net = bias;
+          for (let i = 0; i < numFeatures; i++) {
+            net += weights[i] * inputs[i];
+          }
+          // สำหรับการฝึก ใช้ sigmoid เป็น activation function
+          const output = sigmoid(net);
+          const error = target - output;
+          totalLoss += error * error;
+          const d_out = output * (1 - output);
+          const delta = error * d_out;
+          // ปรับปรุง weights และ bias
+          for (let i = 0; i < numFeatures; i++) {
+            weights[i] += lr * delta * inputs[i];
+          }
+          bias += lr * delta;
+        });
+        if (epoch % Math.floor(epochs/10) === 0) {
+          const avgLoss = totalLoss / dataset.length;
+          trainLogHtml += `Epoch ${epoch}: Loss = ${avgLoss.toFixed(6)}<br>`;
+        }
+      }
+      document.getElementById('trainLog').innerHTML = trainLogHtml;
+      trainedModel = { weights: weights, bias: bias };
+      isTrained = true;
+      displayWeights(trainedModel);
+      alert("ฝึกโมเดลเสร็จสิ้น");
+      console.log("Trained model:", trainedModel);
+    });
+    
+    // ฟังก์ชันแสดงค่า weights และ bias ในตาราง
+    function displayWeights(model) {
+      const tbody = document.getElementById('weightsTableBody');
+      tbody.innerHTML = "";
+      const features = [
+        "user_gender", "user_age", "user_race", "partner_age", "partner_race",
+        "partner_attr_rating", "partner_sinc_rating", "partner_intel_rating",
+        "partner_fun_rating", "partner_amb_rating", "partner_shared_rating"
+      ];
+      model.weights.forEach((w, idx) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${features[idx]}</td><td>${w.toFixed(6)}</td>`;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('biasValue').innerText = model.bias.toFixed(6);
+    }
+    
+    // SECTION 3: Predict
+    document.getElementById('predictForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      if (!isTrained) {
+        alert("โปรดฝึกโมเดลก่อนทำการพยากรณ์");
+        return;
+      }
+      const formData = new FormData(e.target);
+      let inputs = [];
+      inputs.push(parseFloat(formData.get('user_gender')));
+      inputs.push(parseFloat(formData.get('user_age')));
+      inputs.push(parseFloat(formData.get('user_race')));
+      inputs.push(parseFloat(formData.get('partner_age')));
+      inputs.push(parseFloat(formData.get('partner_race')));
+      inputs.push(parseFloat(formData.get('partner_attr_rating')));
+      inputs.push(parseFloat(formData.get('partner_sinc_rating')));
+      inputs.push(parseFloat(formData.get('partner_intel_rating')));
+      inputs.push(parseFloat(formData.get('partner_fun_rating')));
+      inputs.push(parseFloat(formData.get('partner_amb_rating')));
+      inputs.push(parseFloat(formData.get('partner_shared_rating')));
+      
+      console.log("Input vector:", inputs);
+      
+      // คำนวณค่า net จากโมเดลที่ฝึกไว้
+      let net = trainedModel.bias;
+      trainedModel.weights.forEach((w, idx) => {
+        net += w * inputs[idx];
+      });
+      console.log("Calculated net:", net);
+      
+      // สร้างตารางผลลัพธ์ของ activation functions ต่าง ๆ
+      const activations = {
+        'Sigmoid': 'sigmoid',
+        'ReLU': 'relu',
+        'Threshold': 'threshold',
+        'Linear': 'linear',
+        'Tanh': 'tanh'
+      };
+      let tableHtml = `<h5>ตารางผลลัพธ์ของ Activation Functions</h5>
+        <table class="table table-bordered table-sm">
+          <thead>
+            <tr>
+              <th>Activation</th>
+              <th>Output</th>
+            </tr>
+          </thead>
+          <tbody>`;
+      for (let key in activations) {
+        const out = applyActivation(activations[key], net);
+        tableHtml += `<tr><td>${key}</td><td>${out.toFixed(6)}</td></tr>`;
+      }
+      tableHtml += `</tbody></table>`;
+      document.getElementById('activationTableContainer').innerHTML = tableHtml;
+      
+      // ใช้ activation ที่ผู้ใช้เลือกสำหรับผลลัพธ์หลัก
+      const selectedActivation = formData.get('activation');
+      const mainOutput = applyActivation(selectedActivation, net);
+      console.log("Main output:", mainOutput);
+      
+      // คำนวณ Error Cost หากมี Expected Output
+      const expectedVal = formData.get('expected');
+      let errorCost = "";
+      if (expectedVal !== null && expectedVal !== "") {
+        const expected = parseFloat(expectedVal);
+        errorCost = Math.pow((expected - mainOutput), 2).toFixed(6);
+      }
+      const resultHtml = `<p><strong>ค่า Net:</strong> ${net.toFixed(6)}</p>
+        <p><strong>ผลลัพธ์ด้วย ${selectedActivation}:</strong> ${mainOutput.toFixed(6)}</p>
+        ${ errorCost ? `<p><strong>Error Cost:</strong> ${errorCost}</p>` : "" }`;
+      document.getElementById('predictResult').innerHTML = resultHtml;
+    });
+  </script>
+</body>
+</html>

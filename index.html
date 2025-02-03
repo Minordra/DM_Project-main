@@ -1,78 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine's Genetic Matchmaker 💖</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Valentine's Genetic Matchmaker ❤️</title>
 
-    <!-- ลิงก์ Bootstrap 5 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="style.css"> <!-- ไฟล์ CSS ของเรา -->
-    <script src="script.js" type="module"></script>
+  <!-- เรียก Bootstrap  -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  />
+
+  <!-- เรียกไฟล์ CSS สำหรับหน้านี้ (style-index.css) -->
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- เรียก script.js (ใช้ ES Module เพื่อนำเข้า GA_functoin.js) -->
+  <script src="script.js" type="module"></script>
 </head>
 
 <body>
+  <!-- ส่วน Header -->
+  <header class="bg-danger text-white text-center py-4 shadow custom-header">
+    <h1>Valentine's Genetic Matchmaker ❤️</h1>
+    <p>... ข้อความแนะนำสั้นๆ ...</p>
+    <ul class="nav justify-content-end">
+      <li class="nav-item">
+        <a href="homepage.html" class="nav-link link-body-emphasis">Natural Networks</a>
+      </li>
+    </ul>
+  </header>
 
-    <!-- Header -->
-    <header class="bg-danger text-white text-center py-4 shadow">
-        <h1>💖 Valentine's Genetic Matchmaker 💖</h1>
-        <p>ค้นหาคู่ที่สมบูรณ์แบบด้วย Genetic Algorithm</p>
-        <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-end mb-md-0">
-            <li><a href="homepage.html" class="nav-link px-2 link-body-emphasis">Natural Networks</a></li>
-          </ul>
-    </header>
-
-    <!-- กล่องฟอร์ม -->
-    <section class="container mt-4">
-        <div class="row justify-content-center">
-            <div class="col-md-6">
-                <div class="card shadow-lg p-4">
-                    <h2 class="text-center text-danger">💘 ตั้งค่าการจับคู่ที่เหมาะสม</h2>
-                    <form id="myForm">
-                        <div class="mb-3">
-                            <label for="RoundCro" class="form-label">👩‍❤️‍👨 จำนวนคู่รัก (Population Size):</label>
-                            <input type="number" id="RoundCro" class="form-control" placeholder="ระบุจำนวนประชากร">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="Round" class="form-label">🔄 จำนวนรอบจับคู่ (Generations):</label>
-                            <input type="number" id="Round" class="form-control" placeholder="ระบุจำนวนรอบ">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="Benefit" class="form-label">🎯 ค่า Fitness ของคู่ที่สมบูรณ์แบบ (Target Fitness):</label>
-                            <input type="number" id="Benefit" class="form-control" placeholder="ระบุค่า Fitness ที่ต้องการ">
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="method" class="form-label">💕 เลือกวิธีจับคู่ (Mate Selection Method):</label>
-                            <select id="method" class="form-select">
-                                <option value="ranking">Ranking Selection</option>
-                                <option value="elitism">Elitism Selection</option>
-                                <option value="tournament">Tournament Selection</option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-danger w-100">💖 เริ่มต้นจับคู่!</button>
-                    </form>
-                    
-                    <div id="rankingOutput"></div>
-                    <div id="elitismOutput"></div>
-                    <div id="tournamentOutput"></div>
-
-                    <button id="clearBtn" class="btn btn-warning mt-3">ล้างข้อมูล</button>
-                </div>
+  <!-- ส่วนฟอร์ม -->
+  <section class="container mt-4">
+    <div class="row justify-content-center mt-5 mb-5">
+      <div class="col-md-6">
+        <div class="card shadow-lg p-4 card-form-container">
+          <h2 class="text-center text-danger">💞 ตั้งค่าการจับคู่ที่เหมาะสม</h2>
+          <form id="myForm" class="mt-3">
+            <!-- Input Population Size -->
+            <div class="mb-3">
+              <label for="RoundCro" class="form-label">👫 จำนวนประชากร (Population Size):</label>
+              <input
+                type="number"
+                id="RoundCro"
+                class="form-control"
+                placeholder="ระบุจำนวนประชากร"
+              />
             </div>
+            <!-- Input Generations -->
+            <div class="mb-3">
+              <label for="Round" class="form-label">🔎 จำนวนรอบคำนวณ (Generations):</label>
+              <input
+                type="number"
+                id="Round"
+                class="form-control"
+                placeholder="ระบุจำนวนรอบ"
+              />
+            </div>
+            <!-- Input Target Fitness -->
+            <div class="mb-3">
+              <label for="Benefit" class="form-label">🎯 ค่า Fitness เป้าหมาย (Target Fitness):</label>
+              <input
+                type="number"
+                id="Benefit"
+                class="form-control"
+                placeholder="ระบุ Fitness ที่ต้องการ"
+              />
+            </div>
+            <!-- Select Mate Selection Method -->
+            <div class="mb-3">
+              <label for="method" class="form-label">💕 เลือกวิธีผสม (Mate Selection Method):</label>
+              <select id="method" class="form-select">
+                <option value="ranking">Ranking Selection</option>
+                <option value="elitism">Elitism Selection</option>
+                <option value="tournament">Tournament Selection</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-danger w-100">❤️ เริ่มต้นจับคู่!</button>
+          </form>
+
+          <!-- ปุ่มเคลียร์ผลลัพธ์ -->
+          <button id="clearBtn" class="btn btn-warning mt-3">ล้างข้อมูล</button>
         </div>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <!-- แสดงผลลัพธ์ -->
-    <section class="container mt-4">
-        <div id="output" class="alert alert-light text-center shadow"></div>
-    </section>
+  <!-- ส่วนแสดงผลลัพธ์ -->
+  <section class="container mt-4">
+    <div id="output" class="alert alert-light text-center shadow custom-output"></div>
+  </section>
 
-    <!-- ลิงก์ JavaScript ของ Bootstrap -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- เรียก Bootstrap Script -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
