@@ -57,7 +57,7 @@ body {
 .heart {
   position: absolute;
   top: -10px;
-  font-size: 120px; /* เพิ่มขนาดหัวใจ */
+  font-size: 120px; 
   color: #ff477e;
   opacity: 0.9;
   animation: falling-hearts linear infinite;
@@ -92,18 +92,7 @@ body {
   transform: scale(1.07);
 }
 
-/* 6) ปรับแต่งกล่องแสดงผล */
-.custom-output {
-  background: #fff0f3;
-  border: 3px dashed #ff6f91;
-  box-shadow: 0 4px 10px rgba(255, 105, 135, 0.2);
-  padding: 30px;
-  border-radius: 15px;
-  max-width: 900px;
-  margin: 0 auto;
-  position: relative;
-  z-index: 5;
-}
+
 
 /* 7) เพิ่มเอฟเฟกต์ให้ตัวหนังสือ */
 h1, h2 {
